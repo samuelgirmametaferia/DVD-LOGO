@@ -104,6 +104,7 @@
             font-size: 18px;
         }
 
+        /* The pop-up container */
         .popup {
             position: fixed;
             top: 0;
@@ -117,6 +118,7 @@
             z-index: 1000;
         }
 
+        /* The pop-up content box */
         .popup-content {
             background-color: #fff;
             color: #000;
@@ -125,33 +127,38 @@
             text-align: center;
             max-width: 500px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
 
+        /* The close button (×) at the top-right corner */
         .close-btn {
             position: absolute;
             top: 10px;
             right: 10px;
-            font-size: 20px;
+            font-size: 22px;
             cursor: pointer;
         }
     </style>
 </head>
 <body>
+    <!-- The pop-up -->
     <div id="popup" class="popup">
         <div class="popup-content">
             <span class="close-btn" id="closeBtn">&times;</span>
             <h2>Welcome to the Probability Demonstration</h2>
             <p>
-                This application visually demonstrates the concept of probability. 
+                This application visually demonstrates the concept of probability.
                 Specifically, it calculates and displays the real-time probability of a bouncing DVD logo 
-                hitting any of the four corners of the canvas. 
+                hitting any of the four corners of the canvas.
                 Use the controls below to adjust the size of the logo and observe how the probability changes.
             </p>
         </div>
     </div>
 
+    <!-- The canvas for the bouncing DVD logo -->
     <canvas id="dvdCanvas" width="800" height="600"></canvas>
 
+    <!-- Controls for adjusting logo size -->
     <div class="controls">
         <label>
             Width:
@@ -164,9 +171,11 @@
         <button id="restartBtn">Restart Simulation</button>
     </div>
 
+    <!-- Real-time probability display -->
     <div class="probability" id="probabilityDisplay">Probability: 0%</div>
 
     <script>
+        // Display the pop-up as soon as the page loads
         document.addEventListener("DOMContentLoaded", () => {
             const popup = document.getElementById("popup");
             const closeBtn = document.getElementById("closeBtn");
@@ -174,7 +183,7 @@
             // Show the popup when the page loads
             popup.style.display = "flex";
 
-            // Close the popup when the close button is clicked
+            // Hide the popup when the user clicks the close button
             closeBtn.addEventListener("click", () => {
                 popup.style.display = "none";
             });
@@ -192,18 +201,21 @@
 
         // Define the DVD logo properties
         let dvdLogo = {
-            width: parseInt(widthInput.value), // Dynamic width from input
-            height: parseInt(heightInput.value), // Dynamic height from input
-            x: Math.random() * (canvas.width - parseInt(widthInput.value)), // Random starting x position
-            y: Math.random() * (canvas.height - parseInt(heightInput.value)), // Random starting y position
-            dx: 3, // Horizontal velocity
-            dy: 3, // Vertical velocity
-            color: getRandomColor(), // Initial color
+            width: parseInt(widthInput.value),
+            height: parseInt(heightInput.value),
+            // Initialize the starting position randomly
+            x: Math.random() * (canvas.width - parseInt(widthInput.value)),
+            y: Math.random() * (canvas.height - parseInt(heightInput.value)),
+            // Set initial velocities
+            dx: 3,
+            dy: 3,
+            // Pick a random initial color
+            color: getRandomColor(),
             text: 'DVD',
             font: '20px Arial'
         };
 
-        // Function to generate a random color
+        // Helper function to generate a random color
         function getRandomColor() {
             const letters = '0123456789ABCDEF';
             let color = '#';
@@ -215,27 +227,29 @@
 
         // Function to draw the DVD logo
         function drawLogo() {
+            // Draw the rectangular logo
             ctx.fillStyle = dvdLogo.color;
             ctx.fillRect(dvdLogo.x, dvdLogo.y, dvdLogo.width, dvdLogo.height);
 
             // Draw the text in the center of the logo
-            ctx.fillStyle = '#FFFFFF'; // White text
+            ctx.fillStyle = '#FFFFFF';
             ctx.font = dvdLogo.font;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(dvdLogo.text, dvdLogo.x + dvdLogo.width / 2, dvdLogo.y + dvdLogo.height / 2);
         }
 
-        // Function to update the logo's position
+        // Function to update the position and handle bounces
         function updatePosition() {
-            // Check for collision with the canvas boundaries
+            // Bounce off left/right boundaries
             if (dvdLogo.x + dvdLogo.dx > canvas.width - dvdLogo.width || dvdLogo.x + dvdLogo.dx < 0) {
-                dvdLogo.dx = -dvdLogo.dx; // Reverse horizontal direction
-                dvdLogo.color = getRandomColor(); // Change color on bounce
+                dvdLogo.dx = -dvdLogo.dx;
+                dvdLogo.color = getRandomColor(); // Change color upon bounce
             }
+            // Bounce off top/bottom boundaries
             if (dvdLogo.y + dvdLogo.dy > canvas.height - dvdLogo.height || dvdLogo.y + dvdLogo.dy < 0) {
-                dvdLogo.dy = -dvdLogo.dy; // Reverse vertical direction
-                dvdLogo.color = getRandomColor(); // Change color on bounce
+                dvdLogo.dy = -dvdLogo.dy;
+                dvdLogo.color = getRandomColor(); // Change color upon bounce
             }
 
             // Update position
@@ -243,12 +257,18 @@
             dvdLogo.y += dvdLogo.dy;
         }
 
-        // Function to calculate the probability of hitting a corner
+        // Function to calculate probability of hitting a corner
         function calculateProbability() {
+            // Corner area is the same size as the logo,
+            // and there are 4 corners in the canvas
             const cornerWidth = dvdLogo.width;
             const cornerHeight = dvdLogo.height;
-            const cornerArea = (cornerWidth * cornerHeight) * 4; // Four corners
+            const cornerArea = (cornerWidth * cornerHeight) * 4;
+
+            // Total area of the canvas
             const totalArea = canvas.width * canvas.height;
+
+            // Probability (percentage) of hitting a corner
             const probability = (cornerArea / totalArea) * 100;
             return probability.toFixed(2);
         }
@@ -260,47 +280,48 @@
         }
 
         // Animation loop
-        let animationId; // To keep track of the animation frame
-
+        let animationId;
         function animate() {
-            // Clear the canvas
+            // Clear existing drawings
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw and update the logo
+            // Draw the logo, update its position, and update probability
             drawLogo();
             updatePosition();
             updateProbabilityDisplay();
 
-            // Request the next animation frame
+            // Request next animation frame
             animationId = requestAnimationFrame(animate);
         }
 
-        // Function to initialize or reset the simulation
+        // Function to restart the simulation
         function initializeSimulation() {
-            // Reset logo properties based on input values
+            // Reset width/height from input
             dvdLogo.width = parseInt(widthInput.value);
             dvdLogo.height = parseInt(heightInput.value);
+
+            // Place the logo randomly again
             dvdLogo.x = Math.random() * (canvas.width - dvdLogo.width);
             dvdLogo.y = Math.random() * (canvas.height - dvdLogo.height);
-            dvdLogo.color = getRandomColor();
 
-            // Optionally, reset velocities if desired
+            // Reset color and velocities
+            dvdLogo.color = getRandomColor();
             dvdLogo.dx = 3;
             dvdLogo.dy = 3;
 
-            // Start the animation
-            cancelAnimationFrame(animationId); // Stop any existing animation
+            // Stop any existing animation and start a new one
+            cancelAnimationFrame(animationId);
             animate();
         }
 
-        // Event listener for the restart button
+        // Restart simulation on button click
         restartBtn.addEventListener('click', initializeSimulation);
 
-        // Event listener for changes in logo size inputs
+        // Listen for changes in size inputs
         widthInput.addEventListener('change', initializeSimulation);
         heightInput.addEventListener('change', initializeSimulation);
 
-        // Start the initial animation
+        // Start the animation upon page load
         animate();
     </script>
 </body>
